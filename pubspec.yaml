@@ -70,8 +70,9 @@ flutter:
     - Assets/Pictures/StarBucks.png
     - Assets/Pictures/TacoBell.png
     - Assets/Pictures/Yums.png
-
-  #SLIDER ADS
+  # Items Pictures
+    - Assets/Pictures/items/Biryani.jpg
+      #SLIDER ADS
     - Assets/Deals/Deal 1.jpg
     - Assets/Deals/Deal 2.jpg
     - Assets/Deals/Deal 3.jpg

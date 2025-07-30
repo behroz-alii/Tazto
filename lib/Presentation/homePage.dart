@@ -2,6 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
+class HeartIconToggle extends StatefulWidget {
+  @override
+  _HeartIconToggleState createState() => _HeartIconToggleState();
+}
+//Creating like functionality so that button changes its colour when clicked and show pop effect
+class _HeartIconToggleState extends State<HeartIconToggle> {
+  bool isLiked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(
+        begin: 1.0,
+        end: isLiked ? 1.2 : 1.0,
+      ),
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      builder: (context, scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: IconButton(
+            icon: Icon(
+              isLiked ? Icons.favorite : Icons.favorite_border,
+              color: isLiked ? Colors.red : Colors.grey,
+              size: 30,
+            ),
+            onPressed: () {
+              setState(() {
+                isLiked = !isLiked;
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+
 class DealsSlider extends StatelessWidget {
   final List<String> adImages = [
     'Assets/Deals/Deal 1.jpg',
@@ -244,7 +283,10 @@ class _HomePageState extends State<HomePage> {
                       GestureDetector(
                           child: const Text(
                         'View All',
-                        style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold,),
+                        style: TextStyle(
+                          color: Colors.deepOrange,
+                          fontWeight: FontWeight.bold,
+                        ),
                       )),
                       const SizedBox(
                         width: 16,
@@ -260,46 +302,76 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Container(
                     width: double.infinity,
-                    child: const Column(
+                    child: Column(
                       children: [
-                      Row(
-                        children: [
-                          CustomContainer(
-                            title: "Hot Deals",
-                            imagePath: "Assets/icons/hot-deal.png",
+                        const Row(
+                          children: [
+                            CustomContainer(
+                              title: "Hot Deals",
+                              imagePath: "Assets/icons/hot-deal.png",
+                            ),
+                            CustomContainer(
+                              title: "Burgers",
+                              imagePath: "Assets/icons/Burger.png",
+                            ),
+                            CustomContainer(
+                              title: "Pizza",
+                              imagePath: "Assets/icons/pizza.png",
+                            ),
+                            CustomContainer(
+                              title: "Noodles",
+                              imagePath: "Assets/icons/noodle.png",
+                            ),
+                          ],
+                        ),
+                        const Row(
+                          children: [
+                            CustomContainer(
+                              title: "Meat",
+                              imagePath: "Assets/icons/meat.png",
+                            ),
+                            CustomContainer(
+                              title: "Vege",
+                              imagePath: "Assets/icons/vegetarian.png",
+                            ),
+                            CustomContainer(
+                              title: "Desserts",
+                              imagePath: "Assets/icons/dessert.png",
+                            ),
+                            CustomContainer(
+                              title: "Drinks",
+                              imagePath: "Assets/icons/drinks.png",
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          child: const Align(
+                              alignment: Alignment.topLeft,
+                              child: Text('Recommended for you 😍', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Colors.orange ),)),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.fromLTRB(6, 10, 6, 10),
+                          decoration: BoxDecoration(
+                              color: Colors.orangeAccent.withOpacity(0.3),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(15), topRight: Radius.circular(15))
                           ),
-                          CustomContainer(
-                            title: "Burgers",
-                            imagePath: "Assets/icons/Burger.png",
+                          child: Row(
+                            children: [
+                              const Deals(
+                                  title: 'Biryani',
+                                  imgPath: 'Assets/Pictures/items/Biryani.jpg',
+                                  distance: '5km',
+                                  review: '⭐ 4.8 (2.7k)',
+                                  price: '5.50'),
+                            ],
                           ),
-                          CustomContainer(
-                            title: "Pizza",
-                            imagePath: "Assets/icons/pizza.png",
-                          ),
-                          CustomContainer(
-                            title: "Noodles",
-                            imagePath: "Assets/icons/noodle.png",
-                          ),
-                        ],
-                      ),
-                        Row(children: [
-                          CustomContainer(
-                            title: "Meat",
-                            imagePath: "Assets/icons/meat.png",
-                          ),
-                          CustomContainer(
-                            title: "Vege",
-                            imagePath: "Assets/icons/vegetarian.png",
-                          ),
-                          CustomContainer(
-                            title: "Desserts",
-                            imagePath: "Assets/icons/dessert.png",
-                          ),
-                          CustomContainer(
-                            title: "Drinks",
-                            imagePath: "Assets/icons/drinks.png",
-                          ),
-                        ],)
+                        )
                       ],
                     ),
                   )
@@ -336,7 +408,6 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
-
   }
 }
 
@@ -344,7 +415,6 @@ class _HomePageState extends State<HomePage> {
 class CustomContainer extends StatelessWidget {
   final String title;
   final String imagePath;
-
 
   const CustomContainer({
     Key? key,
@@ -355,7 +425,6 @@ class CustomContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-
       child: Container(
         width: 100,
         height: 100,
@@ -366,16 +435,102 @@ class CustomContainer extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 50,
+              width: 70,
               height: 50,
               child: Image.asset(imagePath),
             ),
             const SizedBox(height: 4),
             Text(
-              title, style: const TextStyle(fontFamily: 'OpenSans'),
+              title,
+              style: const TextStyle(fontFamily: 'OpenSans'),
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class Deals extends StatelessWidget {
+  final String title;
+  final String imgPath;
+  final String distance;
+  final String review;
+  final String price;
+
+  const Deals({
+    Key? key,
+    required this.title,
+    required this.imgPath,
+    required this.distance,
+    required this.review,
+    required this.price,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: Card(
+        elevation: 10,
+        child: Container(
+          padding: EdgeInsets.all(8),
+          height: 250,
+          width: 180,
+          decoration: BoxDecoration(
+              color: Colors.white60,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1), // shadow color
+                  spreadRadius: 2, // how wide the shadow spreads
+                  blurRadius: 10, // blur softness
+                  offset: Offset(0, 5), // x, y position of shadow
+                )
+              ]),
+          child: Column(
+            children: [
+              SizedBox(
+                  height: 130,
+                  width: 150,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        imgPath,
+                        fit: BoxFit.fill,
+                      ))),
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                        fontFamily: 'OpenSans-Regular.ttf',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
+                  )),
+              Row(
+                children: [
+                  Text(
+                    distance,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Text(' | '),
+                  Text(review),
+                ],
+              ),
+              Spacer(),
+              Row(
+                children: [
+                  Text(
+                    price,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  Spacer(),
+                  HeartIconToggle()
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
