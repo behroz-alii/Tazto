@@ -65,13 +65,19 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
+    - Assets/Pictures/Tazto_logo_white.png
     - Assets/Pictures/Tazto logo.png
     - Assets/Pictures/PizzaHut.png
     - Assets/Pictures/StarBucks.png
     - Assets/Pictures/TacoBell.png
     - Assets/Pictures/Yums.png
   # Items Pictures
+    - Assets/Pictures/items/Biryani.png
     - Assets/Pictures/items/Biryani.jpg
+    - Assets/Pictures/items/Burger.jpeg
+    - Assets/Pictures/items/Burger 2.jpg
+    - Assets/Pictures/items/Pizza.jpg
+
       #SLIDER ADS
     - Assets/Deals/Deal 1.jpg
     - Assets/Deals/Deal 2.jpg

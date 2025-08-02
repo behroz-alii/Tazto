@@ -96,6 +96,29 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+final recommendation = [
+  {
+    'title' : 'Biryani',
+    'distance': '3km',
+    'review' : '⭐ 4.8 (2.7k)',
+    'price' : 'Rs. 550',
+    'imgPath' : 'Assets/Pictures/items/Biryani.png'
+  },
+  {
+    'title' : 'Burger',
+    'distance': '1.5km',
+    'review' : '⭐ 4.2 (91)',
+    'price' : 'Rs. 900',
+    'imgPath' : 'Assets/Pictures/items/Burger 2.jpg'
+  },
+  {
+    'title' : 'Pizza',
+    'distance': '0.9km',
+    'review' : '⭐ 4.6 (900)',
+    'price' : 'Rs. 2200',
+    'imgPath' : 'Assets/Pictures/items/Pizza.jpg'
+  }
+];
 class _HomePageState extends State<HomePage> {
   // Scroll Controller for color changing app bar
   ScrollController _scrollController = ScrollController();
@@ -129,13 +152,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
           //
           SliverAppBar(
             backgroundColor: Colors.orangeAccent,
-            expandedHeight: 280,
+            expandedHeight: 270,
             pinned: true,
             // Keeps a portion visible when collapsed
             floating: false,
@@ -151,38 +175,33 @@ class _HomePageState extends State<HomePage> {
                   end: Alignment.bottomCenter,
                 )),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Top Row: Icons and Address
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.menu, color: Colors.black),
-                              SizedBox(width: 8),
-                              Icon(Icons.location_on_rounded,
-                                  color: Colors.deepOrange),
-                              Text(
-                                '123 Demo Street',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.black),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            width: 120,
-                          ),
-                          Icon(
-                            Icons.notifications_active_outlined,
-                          ),
-                          Icon(Icons.shopping_bag_outlined,
-                              color: Colors.black),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
+                         const Row(
+                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                         children: [
+                           Icon(FontAwesomeIcons.locationArrow,
+                               color: Colors.deepOrange),
+                           SizedBox(width: 5,),
+                           Text(
+                             '123 Demo Street',
+                             style: TextStyle(
+                                 fontSize: 17, color: Colors.white),
+                           ),
+                           Spacer(),
+                           Icon(color: Colors.white,
+                             FontAwesomeIcons.bell,
+                           ),
+                           SizedBox(width: 5,),
+                           Icon(
+                               color: Colors.white,
+                               FontAwesomeIcons.heart)
+                         ],
+                                               ),
+                      const SizedBox(height: 10),
 
                       // Search Field
                       TextField(
@@ -201,16 +220,16 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         children: [
                           const Text(
-                            'Get unlimited\nfree delivery with\nTazto',
+                            'Get unlimited\nfree delivery\nwith Tazto',
                             style: TextStyle(
                               fontFamily: 'Anton',
                               color: Colors.white,
-                              fontSize: 25,
+                              fontSize: 30,
                               letterSpacing: 1,
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.only(left: 70),
+                            padding: EdgeInsets.only(left: 95),
                             child: Column(
                               children: [
                                 Image.asset(
@@ -348,29 +367,33 @@ class _HomePageState extends State<HomePage> {
                           height: 5,
                         ),
                         Container(
-                          padding: const EdgeInsets.all(16),
-                          child: const Align(
-                              alignment: Alignment.topLeft,
-                              child: Text('Recommended for you 😍', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: Colors.orange ),)),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.fromLTRB(6, 10, 6, 10),
+                          height: 40,
                           decoration: BoxDecoration(
-                              color: Colors.orangeAccent.withOpacity(0.3),
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(15), topRight: Radius.circular(15))
+                            gradient: LinearGradient(colors: [
+                              Colors.orangeAccent, Colors.white
+                            ]  )
                           ),
-                          child: Row(
-                            children: [
-                              const Deals(
-                                  title: 'Biryani',
-                                  imgPath: 'Assets/Pictures/items/Biryani.jpg',
-                                  distance: '5km',
-                                  review: '⭐ 4.8 (2.7k)',
-                                  price: '5.50'),
-                            ],
-                          ),
+                          padding: EdgeInsets.only(left: 10),
+                          child: const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text('Recommended for you 😍', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, ),)),
+                        ),
+                        SizedBox(
+                          height: 280,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                              itemCount: recommendation.length,
+                              itemBuilder: (context, index){
+                              final recommedation = recommendation[index];
+                              return Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Deals(
+                                title: recommedation['title'].toString(),
+                                imgPath: recommedation['imgPath'].toString(),
+                                distance: recommedation['distance'].toString(),
+                                review: recommedation['review'].toString(),
+                                price: recommedation['price'].toString(),
+                              ),);
+                              }),
                         )
                       ],
                     ),
@@ -474,8 +497,8 @@ class Deals extends StatelessWidget {
       child: Card(
         elevation: 10,
         child: Container(
-          padding: EdgeInsets.all(8),
-          height: 250,
+          padding: EdgeInsets.all(10),
+          height: 180,
           width: 180,
           decoration: BoxDecoration(
               color: Colors.white60,
@@ -491,7 +514,7 @@ class Deals extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(
-                  height: 130,
+                  height: 150,
                   width: 150,
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
@@ -499,6 +522,7 @@ class Deals extends StatelessWidget {
                         imgPath,
                         fit: BoxFit.fill,
                       ))),
+              Spacer(),
               Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
