@@ -66,6 +66,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - Assets/Pictures/Tazto_logo_white.png
+    - Assets/Pictures/Tazto_word.png
     - Assets/Pictures/Tazto logo.png
     - Assets/Pictures/PizzaHut.png
     - Assets/Pictures/StarBucks.png
