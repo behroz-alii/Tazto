@@ -382,7 +382,7 @@ class _HomeContentState extends State<HomeContent> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.only(left: 95),
+                          padding: const EdgeInsets.only(left: 60),
                           child: Column(
                             children: [
                               Image.asset(
@@ -417,6 +417,7 @@ class _HomeContentState extends State<HomeContent> {
                             ],
                           ),
                         ),
+
                       ],
                     ),
                   ],
@@ -461,14 +462,18 @@ class _HomeContentState extends State<HomeContent> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 4,
-                children: const [
-                  CustomContainer(
-                    title: "Hot Deals",
-                    imagePath: "Assets/icons/hot-deal.png",
+                children:  [
+                  GestureDetector(
+                    child: CustomContainer(
+                      title: "Hot Deals",
+                      imagePath: "Assets/icons/hot-deal.png",
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Burgers",
-                    imagePath: "Assets/icons/Burger.png",
+                  GestureDetector(
+                    child: CustomContainer(
+                      title: "Burgers",
+                      imagePath: "Assets/icons/Burger.png",
+                    ),
                   ),
                   CustomContainer(
                     title: "Pizza",

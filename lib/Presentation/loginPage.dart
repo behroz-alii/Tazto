@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:tazto/signupPage.dart';
+import 'package:tazto/Presentation/signupPage.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

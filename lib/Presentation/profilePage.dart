@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tazto/Presentation/restaurantRegistrationPage.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -83,7 +84,17 @@ class ProfilePage extends StatelessWidget {
                 children: [
                   _buildProfileOption(
                     icon: Icons.shopping_bag,
-                    title: "My Orders",
+                    title: "My Favorite Restaurants",
+                    onTap: () {},
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.local_offer_outlined,
+                    title: "Special Offers & Promo",
+                    onTap: () {},
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.credit_card,
+                    title: "Payment Methods",
                     onTap: () {},
                   ),
                   _buildProfileOption(
@@ -92,14 +103,21 @@ class ProfilePage extends StatelessWidget {
                     onTap: () {},
                   ),
                   _buildProfileOption(
-                    icon: Icons.payment,
-                    title: "Payment Methods",
+                    icon: Icons.privacy_tip_outlined,
+                    title: "Privacy",
                     onTap: () {},
                   ),
                   _buildProfileOption(
                     icon: Icons.settings,
                     title: "Settings",
                     onTap: () {},
+                  ),
+                  _buildProfileOption(
+                    icon: Icons.restaurant,
+                    title: "Become TazTo",
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => RestaurantRegistrationPage() ));
+                    },
                   ),
                   _buildProfileOption(
                     icon: Icons.help_outline,
@@ -112,7 +130,7 @@ class ProfilePage extends StatelessWidget {
             SizedBox(height: screenHeight * 0.03),
 
             // Logout Button
-            OutlinedButton.icon(
+            ElevatedButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.logout),
               label: const Text("Logout"),
