@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:tazto/Presentation/profilePage.dart';
+import 'restaurantsPage.dart';
+import 'restaurantModel.dart';
 
-// 1. Heart Icon Toggle Widget
+// 1. Heart Icon Toggle Widget (unchanged)
 class HeartIconToggle extends StatefulWidget {
   const HeartIconToggle({Key? key}) : super(key: key);
 
@@ -41,7 +43,7 @@ class _HeartIconToggleState extends State<HeartIconToggle> {
   }
 }
 
-// 2. Deals Slider Widget
+// 2. Deals Slider Widget (unchanged)
 class DealsSlider extends StatelessWidget {
   final List<String> adImages;
 
@@ -78,7 +80,7 @@ class DealsSlider extends StatelessWidget {
   }
 }
 
-// 3. Custom Container Widget
+// 3. Custom Container Widget (unchanged)
 class CustomContainer extends StatelessWidget {
   final String title;
   final String imagePath;
@@ -118,7 +120,7 @@ class CustomContainer extends StatelessWidget {
   }
 }
 
-// 4. Deals Widget
+// 4. Deals Widget (unchanged)
 class Deals extends StatelessWidget {
   final String title;
   final String imgPath;
@@ -201,7 +203,7 @@ class Deals extends StatelessWidget {
   }
 }
 
-// 5. Main Home Page
+// 5. Main Home Page (unchanged)
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -263,7 +265,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// 6. Home Content Widget
+// 6. Home Content Widget (with minimal changes)
 class HomeContent extends StatefulWidget {
   const HomeContent({Key? key}) : super(key: key);
 
@@ -307,7 +309,7 @@ class _HomeContentState extends State<HomeContent> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      setState(() {});
+
     });
   }
 
@@ -315,6 +317,22 @@ class _HomeContentState extends State<HomeContent> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _navigateToCategory(String categoryName, FoodCategory category) {
+    final filteredRestaurants = getMockRestaurants()
+        .where((restaurant) => restaurant.categories.contains(category))
+        .toList();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RestaurantsPage(
+          categoryName: categoryName,
+          restaurants: filteredRestaurants,
+        ),
+      ),
+    );
   }
 
   @override
@@ -417,7 +435,6 @@ class _HomeContentState extends State<HomeContent> {
                             ],
                           ),
                         ),
-
                       ],
                     ),
                   ],
@@ -462,42 +479,62 @@ class _HomeContentState extends State<HomeContent> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 4,
-                children:  [
+                children: [
                   GestureDetector(
-                    child: CustomContainer(
+                    onTap: () => _navigateToCategory('Hot Deals', FoodCategory.HotDeals),
+                    child: const CustomContainer(
                       title: "Hot Deals",
                       imagePath: "Assets/icons/hot-deal.png",
                     ),
                   ),
                   GestureDetector(
-                    child: CustomContainer(
+                    onTap: () => _navigateToCategory('Burgers', FoodCategory.Burgers),
+                    child: const CustomContainer(
                       title: "Burgers",
                       imagePath: "Assets/icons/Burger.png",
                     ),
                   ),
-                  CustomContainer(
-                    title: "Pizza",
-                    imagePath: "Assets/icons/pizza.png",
+                  GestureDetector(
+                    onTap: () => _navigateToCategory('Pizza', FoodCategory.Pizza),
+                    child: const CustomContainer(
+                      title: "Pizza",
+                      imagePath: "Assets/icons/pizza.png",
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Noodles",
-                    imagePath: "Assets/icons/noodle.png",
+                  GestureDetector(
+                    onTap: () => _navigateToCategory('Noodles', FoodCategory.Noodles),
+                    child: const CustomContainer(
+                      title: "Noodles",
+                      imagePath: "Assets/icons/noodle.png",
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Meat",
-                    imagePath: "Assets/icons/meat.png",
+                  GestureDetector(
+                    onTap: () => _navigateToCategory('Meat', FoodCategory.Meat),
+                    child: const CustomContainer(
+                      title: "Meat",
+                      imagePath: "Assets/icons/meat.png",
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Vege",
-                    imagePath: "Assets/icons/vegetarian.png",
+                  GestureDetector(
+                    onTap: () => _navigateToCategory('Vege', FoodCategory.Vege),
+                    child: const CustomContainer(
+                      title: "Vege",
+                      imagePath: "Assets/icons/vegetarian.png",
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Desserts",
-                    imagePath: "Assets/icons/dessert.png",
+                  GestureDetector(
+                    onTap: () => _navigateToCategory('Desserts', FoodCategory.Desserts),
+                    child: const CustomContainer(
+                      title: "Desserts",
+                      imagePath: "Assets/icons/dessert.png",
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Drinks",
-                    imagePath: "Assets/icons/drinks.png",
+                  GestureDetector(
+                    onTap: () => _navigateToCategory('Drinks', FoodCategory.Drinks),
+                    child: const CustomContainer(
+                      title: "Drinks",
+                      imagePath: "Assets/icons/drinks.png",
+                    ),
                   ),
                 ],
               ),
