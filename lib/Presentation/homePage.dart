@@ -4,6 +4,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:tazto/Presentation/profilePage.dart';
 import 'restaurantsPage.dart';
 import 'restaurantModel.dart';
+import 'messagePage.dart';
+import 'aiChatPage.dart';
 
 // 1. Heart Icon Toggle Widget (unchanged)
 class HeartIconToggle extends StatefulWidget {
@@ -216,7 +218,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     const HomeContent(),
     const Center(child: Text('Orders Page')),
-    const Center(child: Text('Messages Page')),
+    const OrderMessagesPage(),
     const Center(child: Text('Cart Page')),
     const ProfilePage(),
   ];
@@ -261,6 +263,19 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+
+      // Floating button for AI chatbot
+      floatingActionButton:  FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => const AIChatWidget(),
+          );
+        },
+        child: const Icon(Icons.android, size: 28, color: Colors.white),
+      )
     );
   }
 }
@@ -578,6 +593,7 @@ class _HomeContentState extends State<HomeContent> {
                   },
                 ),
               ),
+
             ],
           ),
         ),

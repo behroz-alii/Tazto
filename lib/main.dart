@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tazto/Presentation/homePage.dart';
 import 'package:tazto/Presentation/splashScreen.dart';
+import 'package:dart_openai/dart_openai.dart';
 
 void main() {
   runApp(const MyApp());
