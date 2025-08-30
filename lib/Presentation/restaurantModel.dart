@@ -4,12 +4,14 @@ import 'dart:io';
 enum FoodCategory { HotDeals, Burgers, Pizza, Noodles, Meat, Vege, Desserts, Drinks }
 
 class MenuItem {
+  final String id;
   final String name;
   final double price;
   final String description;
   final String imagePath;
 
   MenuItem({
+    required this.id,
     required this.name,
     required this.price,
     required this.description,
@@ -56,6 +58,7 @@ List<Restaurant> getMockRestaurants() {
       categories: [FoodCategory.Pizza, FoodCategory.Drinks],
       menuItems: [
         MenuItem(
+          id: '1',
           name: 'Margherita',
           price: 5.99,
           description: 'Classic Pizza',
@@ -74,6 +77,7 @@ List<Restaurant> getMockRestaurants() {
       categories: [FoodCategory.Burgers, FoodCategory.Drinks, FoodCategory.Desserts],
       menuItems: [
         MenuItem(
+          id: '2',
           name: 'Classic Star',
           price: 12.99,
           description: 'Minced Beef with Home-made sauce, fresh onions, cheese, lettuce and brioche bun',

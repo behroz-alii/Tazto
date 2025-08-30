@@ -3,9 +3,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:tazto/Presentation/profilePage.dart';
 import 'restaurantsPage.dart';
-import 'restaurantModel.dart';
+import 'package:tazto/Presentation/restaurantModel.dart';
 import 'messagePage.dart';
 import 'aiChatPage.dart';
+import 'package:tazto/Presentation/cartPage.dart';
+import 'package:tazto/services/cartProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:tazto/Presentation/ordersPage.dart';
 
 // 1. Heart Icon Toggle Widget (unchanged)
 class HeartIconToggle extends StatefulWidget {
@@ -45,7 +49,6 @@ class _HeartIconToggleState extends State<HeartIconToggle> {
   }
 }
 
-// 2. Deals Slider Widget (unchanged)
 class DealsSlider extends StatelessWidget {
   final List<String> adImages;
 
@@ -66,7 +69,7 @@ class DealsSlider extends StatelessWidget {
         return Builder(
           builder: (BuildContext context) {
             return Container(
-              margin: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 image: DecorationImage(
@@ -82,20 +85,22 @@ class DealsSlider extends StatelessWidget {
   }
 }
 
-// 3. Custom Container Widget (unchanged)
 class CustomContainer extends StatelessWidget {
   final String title;
   final String imagePath;
+  final VoidCallback onTap;
 
   const CustomContainer({
     required this.title,
     required this.imagePath,
+    required this.onTap,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: onTap,
       child: Container(
         width: 100,
         height: 100,
@@ -122,7 +127,6 @@ class CustomContainer extends StatelessWidget {
   }
 }
 
-// 4. Deals Widget (unchanged)
 class Deals extends StatelessWidget {
   final String title;
   final String imgPath;
@@ -205,7 +209,6 @@ class Deals extends StatelessWidget {
   }
 }
 
-// 5. Main Home Page (unchanged)
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -215,13 +218,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  final List<Widget> _pages = [
-    const HomeContent(),
-    const Center(child: Text('Orders Page')),
-    const OrderMessagesPage(),
-    const Center(child: Text('Cart Page')),
-    const ProfilePage(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const HomeContent(),
+      const MyOrdersPage(),
+      const OrderMessagesPage(),
+      Consumer<CartProvider>(
+        builder: (context, cartProvider, child) {
+          return CartPage(
+            cart: cartProvider,
+            onCartUpdated: () => cartProvider.notifyListeners(),
+          );
+        },
+      ),
+      const ProfilePage(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -233,39 +249,70 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.deepOrange,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.copy),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.message_outlined),
-            label: 'Messages',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            label: 'Cart',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: Consumer<CartProvider>(
+        builder: (context, cart, child) {
+          return BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedItemColor: Colors.deepOrange,
+            unselectedItemColor: Colors.grey,
+            backgroundColor: Colors.white,
+            type: BottomNavigationBarType.fixed,
+            items: [
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                label: 'Home',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(FontAwesomeIcons.copy),
+                label: 'Orders',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.message_outlined),
+                label: 'Messages',
+              ),
+              BottomNavigationBarItem(
+                icon: Stack(
+                  children: [
+                    const Icon(Icons.shopping_cart_outlined),
+                    if (cart.totalItems > 0)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            cart.totalItems.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                label: 'Cart',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline),
+                label: 'Profile',
+              ),
+            ],
+          );
+        },
       ),
-
-      // Floating button for AI chatbot
-      floatingActionButton:  FloatingActionButton(
+      floatingActionButton: _selectedIndex != 3 ? FloatingActionButton(
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -275,12 +322,11 @@ class _HomePageState extends State<HomePage> {
           );
         },
         child: const Icon(Icons.android, size: 28, color: Colors.white),
-      )
+      ) : null,
     );
   }
 }
 
-// 6. Home Content Widget (with minimal changes)
 class HomeContent extends StatefulWidget {
   const HomeContent({Key? key}) : super(key: key);
 
@@ -323,9 +369,7 @@ class _HomeContentState extends State<HomeContent> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-
-    });
+    _scrollController.addListener(() {});
   }
 
   @override
@@ -495,61 +539,45 @@ class _HomeContentState extends State<HomeContent> {
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: 4,
                 children: [
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Hot Deals",
+                    imagePath: "Assets/icons/hot-deal.png",
                     onTap: () => _navigateToCategory('Hot Deals', FoodCategory.HotDeals),
-                    child: const CustomContainer(
-                      title: "Hot Deals",
-                      imagePath: "Assets/icons/hot-deal.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Burgers",
+                    imagePath: "Assets/icons/Burger.png",
                     onTap: () => _navigateToCategory('Burgers', FoodCategory.Burgers),
-                    child: const CustomContainer(
-                      title: "Burgers",
-                      imagePath: "Assets/icons/Burger.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Pizza",
+                    imagePath: "Assets/icons/pizza.png",
                     onTap: () => _navigateToCategory('Pizza', FoodCategory.Pizza),
-                    child: const CustomContainer(
-                      title: "Pizza",
-                      imagePath: "Assets/icons/pizza.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Noodles",
+                    imagePath: "Assets/icons/noodle.png",
                     onTap: () => _navigateToCategory('Noodles', FoodCategory.Noodles),
-                    child: const CustomContainer(
-                      title: "Noodles",
-                      imagePath: "Assets/icons/noodle.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Meat",
+                    imagePath: "Assets/icons/meat.png",
                     onTap: () => _navigateToCategory('Meat', FoodCategory.Meat),
-                    child: const CustomContainer(
-                      title: "Meat",
-                      imagePath: "Assets/icons/meat.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Vege",
+                    imagePath: "Assets/icons/vegetarian.png",
                     onTap: () => _navigateToCategory('Vege', FoodCategory.Vege),
-                    child: const CustomContainer(
-                      title: "Vege",
-                      imagePath: "Assets/icons/vegetarian.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Desserts",
+                    imagePath: "Assets/icons/dessert.png",
                     onTap: () => _navigateToCategory('Desserts', FoodCategory.Desserts),
-                    child: const CustomContainer(
-                      title: "Desserts",
-                      imagePath: "Assets/icons/dessert.png",
-                    ),
                   ),
-                  GestureDetector(
+                  CustomContainer(
+                    title: "Drinks",
+                    imagePath: "Assets/icons/drinks.png",
                     onTap: () => _navigateToCategory('Drinks', FoodCategory.Drinks),
-                    child: const CustomContainer(
-                      title: "Drinks",
-                      imagePath: "Assets/icons/drinks.png",
-                    ),
                   ),
                 ],
               ),
@@ -593,7 +621,6 @@ class _HomeContentState extends State<HomeContent> {
                   },
                 ),
               ),
-
             ],
           ),
         ),

@@ -165,7 +165,7 @@ class _AIChatWidgetState extends State<AIChatWidget> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           gradient: const LinearGradient(
-                            colors: [Colors.deepOrange, Colors.orangeAccent],
+                            colors: [Colors.orange, Colors.orangeAccent],
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -214,8 +214,8 @@ class _ChatBubble extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: isUser
                 ? const LinearGradient(
-                colors: [Colors.deepOrange, Colors.orangeAccent])
-                : const LinearGradient(colors: [Colors.blueGrey, Colors.grey]),
+                colors: [Colors.orange, Colors.orangeAccent])
+                : const LinearGradient(colors: [Colors.white38, Colors.white70]),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(

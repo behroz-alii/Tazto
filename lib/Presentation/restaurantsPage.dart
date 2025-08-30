@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'restaurantModel.dart';
+import 'package:provider/provider.dart';
+import 'package:tazto/Presentation/restaurantModel.dart';
 import 'restaurantMenuPage.dart';
+import 'package:tazto/services/cartModel.dart';
+import 'package:tazto/services/cartProvider.dart';
 
 class RestaurantsPage extends StatelessWidget {
   final String categoryName;
@@ -16,15 +19,14 @@ class RestaurantsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$categoryName Restaurants', style: TextStyle(fontWeight: FontWeight.w400),),
+        title: Text('$categoryName Restaurants',
+            style: TextStyle(fontWeight: FontWeight.w400)),
         centerTitle: true,
         backgroundColor: Colors.orangeAccent,
         elevation: 0,
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white
-        ),
+        decoration: const BoxDecoration(color: Colors.white),
         child: ListView.builder(
           padding: EdgeInsets.all(8),
           itemCount: restaurants.length,
@@ -39,11 +41,14 @@ class RestaurantsPage extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: () {
+                  final cartProvider = Provider.of<CartProvider>(context, listen: false);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => RestaurantMenuPage(
                         restaurant: restaurant,
+                        cart: cartProvider,
+                        onCartUpdated: () => cartProvider.notifyListeners(),
                       ),
                     ),
                   );
@@ -52,7 +57,6 @@ class RestaurantsPage extends StatelessWidget {
                   padding: EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      // Restaurant Logo
                       Container(
                         width: 80,
                         height: 80,
@@ -65,8 +69,6 @@ class RestaurantsPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 12),
-
-                      // Restaurant Info (simplified)
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,8 +99,6 @@ class RestaurantsPage extends StatelessWidget {
                           ],
                         ),
                       ),
-
-                      // Forward arrow only
                       Icon(Icons.arrow_forward, color: Colors.grey),
                     ],
                   ),

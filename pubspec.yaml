@@ -43,6 +43,11 @@ dependencies:
   flutter_animate: ^4.1.1+1
   dart_openai: ^5.0.0
   http: ^1.1.0
+  provider: ^6.0.5
+  flutter_svg : ^2.0.10+1
+  flutter_stripe: ^9.5.0
+  lottie: ^2.7.0
+
   #openai_dart: ^0.1.7  # For GPT-4
 
 
@@ -100,7 +105,13 @@ flutter:
     - Assets/icons/noodle.png
     - Assets/icons/pizza.png
     - Assets/icons/vegetarian.png
+    - Assets/icons/Mastercard.svg
+    - Assets/icons/Google.svg
+    - Assets/icons/Cash.svg
 
+      #Animations
+    - Assets/Animations/Delivery Service man.json
+    - Assets/Animations/No orders.json
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
