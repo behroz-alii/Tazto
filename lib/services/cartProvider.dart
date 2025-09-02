@@ -3,42 +3,37 @@ import 'package:tazto/services/cartModel.dart';
 import 'package:tazto/Presentation/restaurantModel.dart';
 
 class CartProvider extends ChangeNotifier {
-  final List<CartItem> _items = [];
+  final Cart _cart = Cart();
+  String? _currentRestaurantName;
+  String? _currentRestaurantLogo;
 
-  List<CartItem> get items => _items;
+  List<CartItem> get items => _cart.items;
+  String? get restaurantName => _currentRestaurantName;
+  String? get restaurantLogo => _currentRestaurantLogo;
+
+  void setRestaurantInfo(String name, String logo) {
+    _currentRestaurantName = name;
+    _currentRestaurantLogo = logo;
+    notifyListeners();
+  }
 
   void addItem(MenuItem menuItem) {
-    final existingIndex = _items.indexWhere((item) => item.id == menuItem.id);
-
-    if (existingIndex >= 0) {
-      _items[existingIndex].quantity++;
-    } else {
-      _items.add(CartItem(
-        id: menuItem.id,
-        name: menuItem.name,
-        description: menuItem.description,
-        price: menuItem.price,
-        imagePath: menuItem.imagePath,
-      ));
-    }
+    _cart.addItem(menuItem, _currentRestaurantName ?? '', _currentRestaurantLogo ?? '');
     notifyListeners();
   }
 
   void removeItem(String id) {
-    _items.removeWhere((item) => item.id == id);
+    _cart.removeItem(id);
     notifyListeners();
   }
 
   void clearCart() {
-    _items.clear();
+    _cart.clearCart();
+    _currentRestaurantName = null;
+    _currentRestaurantLogo = null;
     notifyListeners();
   }
 
-  double get totalAmount {
-    return _items.fold(0, (sum, item) => sum + (item.price * item.quantity));
-  }
-
-  int get totalItems {
-    return _items.fold(0, (sum, item) => sum + item.quantity);
-  }
+  double get totalAmount => _cart.totalAmount;
+  int get totalItems => _cart.totalItems;
 }

@@ -23,7 +23,10 @@ class RestaurantMenuPage extends StatefulWidget {
 
 class _RestaurantMenuPageState extends State<RestaurantMenuPage> {
   @override
+
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.cart.setRestaurantInfo(widget.restaurant.name, widget.restaurant.logoPath);});
     return Scaffold(
       floatingActionButton: Consumer<CartProvider>(
         builder: (context, cart, child) {

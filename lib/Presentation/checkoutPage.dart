@@ -105,26 +105,53 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   );
                   return;
                 }
-// Get providers
+
                 final cartProvider = Provider.of<CartProvider>(context, listen: false);
                 final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
-                // Calculate total with delivery and tax
+                // DEBUG: Check cart contents
+                print('🛒 Cart items count: ${cartProvider.items.length}');
+                print('🏪 Restaurant: ${cartProvider.restaurantName}');
+
+                for (var item in cartProvider.items) {
+                  print('📦 Cart item: ${item.name} x${item.quantity}');
+                }
+
                 final deliveryFee = 2.99;
                 final tax = widget.totalAmount * 0.08;
                 final totalWithFees = widget.totalAmount + deliveryFee + tax;
 
-                // ✅ ADD THE ORDER TO ORDER PROVIDER
-                orderProvider.addOrder(cartProvider.items, totalWithFees);
+                // Create a DEEP COPY (important!)
+                List<CartItem> orderItems = [];
+                for (var cartItem in cartProvider.items) {
+                  orderItems.add(CartItem(
+                    id: cartItem.id,
+                    name: cartItem.name,
+                    description: cartItem.description,
+                    price: cartItem.price,
+                    imagePath: cartItem.imagePath,
+                    restaurantName: cartItem.restaurantName, // This should work now
+                    restaurantLogo: cartItem.restaurantLogo, // This should work now
+                    quantity: cartItem.quantity,
+                  ));
+                }
 
-                // Clear cart and navigate
+
+
+                orderProvider.addOrder(
+                    orderItems,
+                    totalWithFees,
+                    cartProvider.restaurantName ?? 'Unknown Restaurant',
+                    cartProvider.restaurantLogo ?? ''
+                );
+
                 cartProvider.clearCart();
 
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => OrderConfirmationPage(
-                      totalAmount: totalWithFees, // Pass the total with fees
+                      totalAmount: totalWithFees,
                       address: selectedAddress,
                       paymentMethod: selectedPaymentMethod,
                     ),

@@ -6,6 +6,8 @@ class CartItem {
   final String description;
   final double price;
   final String imagePath;
+  final String restaurantName;
+  final String restaurantLogo;
   int quantity;
 
   CartItem({
@@ -14,6 +16,8 @@ class CartItem {
     required this.description,
     required this.price,
     required this.imagePath,
+    required this.restaurantName,
+    required this.restaurantLogo,
     this.quantity = 1,
   });
 }
@@ -23,7 +27,7 @@ class Cart {
 
   List<CartItem> get items => _items;
 
-  void addItem(MenuItem menuItem) {
+  void addItem(MenuItem menuItem, String restaurantName, String restaurantLogo) {
     final existingIndex = _items.indexWhere((item) => item.id == menuItem.id);
 
     if (existingIndex >= 0) {
@@ -35,6 +39,8 @@ class Cart {
         description: menuItem.description,
         price: menuItem.price,
         imagePath: menuItem.imagePath,
+        restaurantName: restaurantName,
+        restaurantLogo: restaurantLogo,
       ));
     }
   }

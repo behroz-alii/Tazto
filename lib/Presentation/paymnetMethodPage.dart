@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'package:http/http.dart' as http;
 import 'package:tazto/Presentation/orderConfirmationPage.dart';
+import 'package:tazto/services/cartProvider.dart';
 
 class PaymentMethodPage extends StatelessWidget {
   final int cartAmount; // in cents
@@ -17,7 +18,7 @@ class PaymentMethodPage extends StatelessWidget {
   });
 
   // ✅ Your local backend (change IP if needed)
-  String get _baseUrl => 'http://192.168.1.13:3000';
+  String get _baseUrl => 'http://192.168.1.12:4242';
 
   Future<String> _createPaymentIntent() async {
     final uri = Uri.parse('$_baseUrl/create-payment-intent');
@@ -55,6 +56,7 @@ class PaymentMethodPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('✅ Card Payment Successful')),
       );
+
 
       // Auto confirm order
       Navigator.pushReplacement(
