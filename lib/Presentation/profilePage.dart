@@ -1,8 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tazto/Presentation/restaurantRegistrationPage.dart';
+import 'dart:io';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
+  bool _imageError = false;
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 500,
+        maxHeight: 500,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _profileImage = File(pickedFile.path);
+          _imageError = false; // Reset error state when user selects an image
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to pick image: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a Photo'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +90,9 @@ class ProfilePage extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: EdgeInsets.all(screenWidth * 0.05),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -24,25 +101,43 @@ class ProfilePage extends StatelessWidget {
             Center(
               child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: screenWidth * 0.18,
-                    backgroundImage: const NetworkImage(
-                      "https://via.placeholder.com/150",
+                  GestureDetector(
+                    onTap: _showImagePickerOptions,
+                    child: CircleAvatar(
+                      radius: screenWidth * 0.18,
+                      backgroundColor: Colors.grey[200],
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!) as ImageProvider
+                          : _imageError
+                          ? null // Don't try to load network image if there was an error
+                          : const NetworkImage(
+                        "https://via.placeholder.com/150",
+                      ),
+                      child: _profileImage == null || _imageError
+                          ? const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.grey,
+                      )
+                          : null,
                     ),
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.blue,
-                      ),
-                      padding: const EdgeInsets.all(6),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 20,
+                    child: GestureDetector(
+                      onTap: _showImagePickerOptions,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                   )
@@ -71,6 +166,12 @@ class ProfilePage extends StatelessWidget {
                 onPressed: () {},
                 icon: const Icon(Icons.edit),
                 label: const Text("Edit Profile"),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ),
             SizedBox(height: screenHeight * 0.03),
@@ -80,6 +181,7 @@ class ProfilePage extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
+              elevation: 2,
               child: Column(
                 children: [
                   _buildProfileOption(
@@ -87,38 +189,47 @@ class ProfilePage extends StatelessWidget {
                     title: "My Favorite Restaurants",
                     onTap: () {},
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.local_offer_outlined,
                     title: "Special Offers & Promo",
                     onTap: () {},
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.credit_card,
                     title: "Payment Methods",
                     onTap: () {},
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.location_on,
                     title: "My Addresses",
                     onTap: () {},
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.privacy_tip_outlined,
                     title: "Privacy",
                     onTap: () {},
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.settings,
                     title: "Settings",
                     onTap: () {},
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.restaurant,
                     title: "Become TazTo",
                     onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => RestaurantRegistrationPage() ));
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                          const RestaurantRegistrationPage()));
                     },
                   ),
+                  const Divider(height: 1),
                   _buildProfileOption(
                     icon: Icons.help_outline,
                     title: "Help & Support",
@@ -130,14 +241,22 @@ class ProfilePage extends StatelessWidget {
             SizedBox(height: screenHeight * 0.03),
 
             // Logout Button
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.logout),
-              label: const Text("Logout"),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                side: const BorderSide(color: Colors.red),
-                foregroundColor: Colors.red,
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // Add logout functionality
+                },
+                icon: const Icon(Icons.logout),
+                label: const Text("Logout"),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: Colors.red),
+                  foregroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ),
           ],

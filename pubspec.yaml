@@ -39,6 +39,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   image_picker: ^0.8.7+3
+  permission_handler: ^11.0.1
   intl: ^0.18.1
   flutter_animate: ^4.1.1+1
   dart_openai: ^5.0.0
@@ -47,6 +48,12 @@ dependencies:
   flutter_svg : ^2.0.10+1
   flutter_stripe: ^9.5.0
   lottie: ^2.7.0
+  scroll_to_index: ^2.0.0
+  google_maps_flutter: ^2.5.3
+  geolocator: ^11.0.0
+  geocoding: ^3.0.0
+  flutter_google_places_sdk: ^0.3.8
+  flutter_typeahead: ^5.2.0
 
   #openai_dart: ^0.1.7  # For GPT-4
 

@@ -10,6 +10,9 @@ import 'package:tazto/Presentation/cartPage.dart';
 import 'package:tazto/services/cartProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:tazto/Presentation/ordersPage.dart';
+import 'package:tazto/services/searchService.dart';
+import 'restaurantMenuPage.dart';
+import 'package:tazto/Presentation/locationPickerPage.dart';
 
 // 1. Heart Icon Toggle Widget (unchanged)
 class HeartIconToggle extends StatefulWidget {
@@ -317,10 +320,11 @@ class _HomePageState extends State<HomePage> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.white,
             builder: (context) => const AIChatWidget(),
           );
         },
+        backgroundColor: Colors.orange.withOpacity(0.4),
         child: const Icon(Icons.android, size: 28, color: Colors.white),
       ) : null,
     );
@@ -341,6 +345,12 @@ class _HomeContentState extends State<HomeContent> {
     'Assets/Deals/Deal 2.jpg',
     'Assets/Deals/Deal 3.jpg',
   ];
+  String _currentAddress = 'Confirm your address';
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  final SearchService _searchService = SearchService(getMockRestaurants());
+  List<SearchResult> _searchResults = [];
+  bool _showSearchResults = false;
 
   final List<Map<String, String>> recommendation = [
     {
@@ -370,12 +380,39 @@ class _HomeContentState extends State<HomeContent> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {});
+    _searchController.addListener(_onSearchChanged);
+    _searchFocusNode.addListener(_onSearchFocusChanged);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text;
+    if (query.isNotEmpty) {
+      setState(() {
+        _searchResults = _searchService.search(query);
+        _showSearchResults = true;
+      });
+    } else {
+      setState(() {
+        _showSearchResults = false;
+        _searchResults.clear();
+      });
+    }
+  }
+
+  void _onSearchFocusChanged() {
+    if (!_searchFocusNode.hasFocus && _searchController.text.isEmpty) {
+      setState(() {
+        _showSearchResults = false;
+      });
+    }
   }
 
   void _navigateToCategory(String categoryName, FoodCategory category) {
@@ -394,237 +431,355 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+  void _navigateToRestaurantMenu(Restaurant restaurant, {MenuItem? highlightItem}) {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RestaurantMenuPage(
+          restaurant: restaurant,
+          cart: cartProvider,
+          onCartUpdated: () => cartProvider.notifyListeners(),
+          highlightItem: highlightItem, // This should work now
+        ),
+      ),
+    ).then((_) {
+      // Clear search when returning
+      setState(() {
+        _searchController.clear();
+        _showSearchResults = false;
+      });
+      _searchFocusNode.unfocus();
+    });
+  }
+
+  Widget _buildSearchResults() {
+    if (_searchResults.isEmpty && _searchController.text.isNotEmpty) {
+      return const SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text('No results found'),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+            (context, index) {
+          final result = _searchResults[index];
+          return ListTile(
+            leading: result.type == SearchResultType.restaurant
+                ? Image.asset(result.restaurant.logoPath, width: 40, height: 40)
+                : Image.asset(result.menuItem!.imagePath, width: 40, height: 40),
+            title: Text(
+              result.type == SearchResultType.restaurant
+                  ? result.restaurant.name
+                  : result.menuItem!.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: result.type == SearchResultType.menuItem
+                ? Text('Rs. ${result.menuItem!.price.toStringAsFixed(2)} - ${result.restaurant.name}')
+                : Text('Restaurant - ${result.restaurant.menuItems.length} items'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              _navigateToRestaurantMenu(
+                result.restaurant,
+                highlightItem: result.menuItem,
+              );
+            },
+          );
+        },
+        childCount: _searchResults.length,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverAppBar(
-          backgroundColor: Colors.orangeAccent,
-          expandedHeight: 270,
-          pinned: true,
-          floating: false,
-          flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orangeAccent, Colors.orangeAccent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+    return Scaffold(
+      body: _showSearchResults
+          ? CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.orangeAccent,
+            pinned: true,
+            floating: true,
+            title: TextField(
+              controller: _searchController,
+              focusNode: _searchFocusNode,
+              decoration: InputDecoration(
+                hintText: "Search meals or restaurants",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
                 ),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _showSearchResults = false;
+                    });
+                  },
+                )
+                    : null,
               ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(FontAwesomeIcons.locationArrow, color: Colors.deepOrange),
-                        SizedBox(width: 5),
-                        Text(
-                          '123 Demo Street',
-                          style: TextStyle(fontSize: 17, color: Colors.white),
-                        ),
-                        Spacer(),
-                        Icon(FontAwesomeIcons.bell, color: Colors.white),
-                        SizedBox(width: 5),
-                        Icon(FontAwesomeIcons.heart, color: Colors.white),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: "Search meals or restaurants",
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
+            ),
+            automaticallyImplyLeading: false,
+          ),
+          _buildSearchResults(),
+        ],
+      )
+          : CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Colors.orangeAccent,
+            expandedHeight: 270,
+            pinned: true,
+            floating: false,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orangeAccent, Colors.orangeAccent],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // In HomePage.dart - Update the location icon onTap handler
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LocationPickerPage()),
+                              );
+
+                              if (result != null && result is Map<String, dynamic>) {
+                                setState(() {
+                                  _currentAddress = result["address"];
+                                });
+                              }
+                            },
+                            child: const Icon(FontAwesomeIcons.locationArrow, color: Colors.deepOrange),
+                          ),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              _currentAddress,
+                              style: const TextStyle(fontSize: 17, color: Colors.white),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                       SizedBox(height: 10),
+                      TextField(
+                        controller: _searchController,
+                        focusNode: _searchFocusNode,
+                        decoration: InputDecoration(
+                          hintText: "Search meals or restaurants",
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text(
-                          'Get unlimited\nfree delivery\nwith Tazto',
-                          style: TextStyle(
-                            fontFamily: 'Anton',
-                            color: Colors.white,
-                            fontSize: 30,
-                            letterSpacing: 1,
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Text(
+                            'Get unlimited\nfree delivery\nwith Tazto',
+                            style: TextStyle(
+                              fontFamily: 'Anton',
+                              color: Colors.white,
+                              fontSize: 30,
+                              letterSpacing: 1,
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 60),
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                'Assets/Pictures/PizzaHut.png',
-                                width: 50,
-                                height: 50,
-                              ),
-                              const SizedBox(height: 10),
-                              Image.asset(
-                                'Assets/Pictures/StarBucks.png',
-                                width: 50,
-                                height: 50,
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(left: 60),
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'Assets/Pictures/PizzaHut.png',
+                                  width: 50,
+                                  height: 50,
+                                ),
+                                const SizedBox(height: 10),
+                                Image.asset(
+                                  'Assets/Pictures/StarBucks.png',
+                                  width: 50,
+                                  height: 50,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Column(
-                            children: [
-                              Image.asset(
-                                'Assets/Pictures/TacoBell.png',
-                                width: 50,
-                                height: 50,
-                              ),
-                              const SizedBox(height: 10),
-                              Image.asset(
-                                'Assets/Pictures/Yums.png',
-                                width: 50,
-                                height: 50,
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'Assets/Pictures/TacoBell.png',
+                                  width: 50,
+                                  height: 50,
+                                ),
+                                const SizedBox(height: 10),
+                                Image.asset(
+                                  'Assets/Pictures/Yums.png',
+                                  width: 50,
+                                  height: 50,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Column(
-            children: [
-              const SizedBox(height: 5),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    const Text(
-                      'Special Offers!',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {},
-                      child: const Text(
-                        'View All',
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                const SizedBox(height: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Special Offers!',
                         style: TextStyle(
-                          color: Colors.deepOrange,
                           fontWeight: FontWeight.bold,
+                          fontSize: 20,
                         ),
                       ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () {},
+                        child: const Text(
+                          'View All',
+                          style: TextStyle(
+                            color: Colors.deepOrange,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 5),
+                DealsSlider(adImages: adImages),
+                const SizedBox(height: 5),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 4,
+                  children: [
+                    CustomContainer(
+                      title: "Hot Deals",
+                      imagePath: "Assets/icons/hot-deal.png",
+                      onTap: () => _navigateToCategory('Hot Deals', FoodCategory.HotDeals),
+                    ),
+                    CustomContainer(
+                      title: "Burgers",
+                      imagePath: "Assets/icons/Burger.png",
+                      onTap: () => _navigateToCategory('Burgers', FoodCategory.Burgers),
+                    ),
+                    CustomContainer(
+                      title: "Pizza",
+                      imagePath: "Assets/icons/pizza.png",
+                      onTap: () => _navigateToCategory('Pizza', FoodCategory.Pizza),
+                    ),
+                    CustomContainer(
+                      title: "Noodles",
+                      imagePath: "Assets/icons/noodle.png",
+                      onTap: () => _navigateToCategory('Noodles', FoodCategory.Noodles),
+                    ),
+                    CustomContainer(
+                      title: "Meat",
+                      imagePath: "Assets/icons/meat.png",
+                      onTap: () => _navigateToCategory('Meat', FoodCategory.Meat),
+                    ),
+                    CustomContainer(
+                      title: "Vege",
+                      imagePath: "Assets/icons/vegetarian.png",
+                      onTap: () => _navigateToCategory('Vege', FoodCategory.Vege),
+                    ),
+                    CustomContainer(
+                      title: "Desserts",
+                      imagePath: "Assets/icons/dessert.png",
+                      onTap: () => _navigateToCategory('Desserts', FoodCategory.Desserts),
+                    ),
+                    CustomContainer(
+                      title: "Drinks",
+                      imagePath: "Assets/icons/drinks.png",
+                      onTap: () => _navigateToCategory('Drinks', FoodCategory.Drinks),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 5),
-              DealsSlider(adImages: adImages),
-              const SizedBox(height: 5),
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 4,
-                children: [
-                  CustomContainer(
-                    title: "Hot Deals",
-                    imagePath: "Assets/icons/hot-deal.png",
-                    onTap: () => _navigateToCategory('Hot Deals', FoodCategory.HotDeals),
+                const SizedBox(height: 5),
+                Container(
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.orangeAccent, Colors.white],
+                    ),
                   ),
-                  CustomContainer(
-                    title: "Burgers",
-                    imagePath: "Assets/icons/Burger.png",
-                    onTap: () => _navigateToCategory('Burgers', FoodCategory.Burgers),
-                  ),
-                  CustomContainer(
-                    title: "Pizza",
-                    imagePath: "Assets/icons/pizza.png",
-                    onTap: () => _navigateToCategory('Pizza', FoodCategory.Pizza),
-                  ),
-                  CustomContainer(
-                    title: "Noodles",
-                    imagePath: "Assets/icons/noodle.png",
-                    onTap: () => _navigateToCategory('Noodles', FoodCategory.Noodles),
-                  ),
-                  CustomContainer(
-                    title: "Meat",
-                    imagePath: "Assets/icons/meat.png",
-                    onTap: () => _navigateToCategory('Meat', FoodCategory.Meat),
-                  ),
-                  CustomContainer(
-                    title: "Vege",
-                    imagePath: "Assets/icons/vegetarian.png",
-                    onTap: () => _navigateToCategory('Vege', FoodCategory.Vege),
-                  ),
-                  CustomContainer(
-                    title: "Desserts",
-                    imagePath: "Assets/icons/dessert.png",
-                    onTap: () => _navigateToCategory('Desserts', FoodCategory.Desserts),
-                  ),
-                  CustomContainer(
-                    title: "Drinks",
-                    imagePath: "Assets/icons/drinks.png",
-                    onTap: () => _navigateToCategory('Drinks', FoodCategory.Drinks),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Container(
-                height: 40,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.orangeAccent, Colors.white],
-                  ),
-                ),
-                padding: const EdgeInsets.only(left: 10),
-                child: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Recommended for you 😍',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                  padding: const EdgeInsets.only(left: 10),
+                  child: const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Recommended for you 😍',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 280,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: recommendation.length,
-                  itemBuilder: (context, index) {
-                    final item = recommendation[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Deals(
-                        title: item['title']!,
-                        imgPath: item['imgPath']!,
-                        distance: item['distance']!,
-                        review: item['review']!,
-                        price: item['price']!,
-                      ),
-                    );
-                  },
+                SizedBox(
+                  height: 280,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: recommendation.length,
+                    itemBuilder: (context, index) {
+                      final item = recommendation[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Deals(
+                          title: item['title']!,
+                          imgPath: item['imgPath']!,
+                          distance: item['distance']!,
+                          review: item['review']!,
+                          price: item['price']!,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
