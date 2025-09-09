@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tazto/Presentation/restaurantRegistrationPage.dart';
 import 'dart:io';
+import 'package:tazto/Presentation/privacyPolicy.dart';
+import 'package:tazto/Presentation/helpSupportPage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -211,7 +213,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.privacy_tip_outlined,
                     title: "Privacy",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PrivacyPolicyPage()));
+                    },
                   ),
                   const Divider(height: 1),
                   _buildProfileOption(
@@ -233,7 +237,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.help_outline,
                     title: "Help & Support",
-                    onTap: () {},
+                    onTap: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => HelpSupportPage()));},
                   ),
                 ],
               ),

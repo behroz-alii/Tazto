@@ -54,6 +54,7 @@ dependencies:
   geocoding: ^3.0.0
   flutter_google_places_sdk: ^0.3.8
   flutter_typeahead: ^5.2.0
+  url_launcher: ^6.1.11
 
   #openai_dart: ^0.1.7  # For GPT-4
 
