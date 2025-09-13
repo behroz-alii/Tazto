@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
+import 'package:tazto/services/locationManager.dart';
 
 class LocationPickerPage extends StatefulWidget {
   const LocationPickerPage({Key? key}) : super(key: key);
@@ -15,10 +16,11 @@ class LocationPickerPage extends StatefulWidget {
 class _LocationPickerPageState extends State<LocationPickerPage> {
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
+  LatLng? _selectedLatLng; // New variable to track the selected location
   String? _selectedAddress;
   final TextEditingController _searchController = TextEditingController();
 
-  final String apiKey = "AIzaSyBEFokPXfnNuUkTWz1OCbbdQbfPc_qPLm8"; // 🔑 Replace with your API Key
+  final String apiKey = "AIzaSyBEFokPXfnNuUkTWz1OCbbdQbfPc_qPLm8"; // 🔑
 
   @override
   void initState() {
@@ -43,6 +45,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
 
     setState(() {
       _currentLatLng = LatLng(position.latitude, position.longitude);
+      _selectedLatLng = _currentLatLng; // Set initial selected location
     });
 
     if (_mapController != null) {
@@ -120,6 +123,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
 
           setState(() {
             _currentLatLng = latLng;
+            _selectedLatLng = latLng; // Update selected location
             _selectedAddress = data["results"][0]["formatted_address"];
             _searchController.text = _selectedAddress!;
           });
@@ -136,12 +140,84 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
     }
   }
 
+  void _showLocationTypeSelector() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.home, color: Colors.blue),
+                title: Text('Home'),
+                onTap: () {
+                  Navigator.pop(context, 'home');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.work, color: Colors.green),
+                title: Text('Office'),
+                onTap: () {
+                  Navigator.pop(context, 'office');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: Colors.orange),
+                title: Text('Other Place'),
+                onTap: () {
+                  Navigator.pop(context, 'other');
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    ).then((selectedType) {
+      if (selectedType != null && _selectedLatLng != null && _selectedAddress != null) {
+        // Save the location using LocationManager
+        LocationManager().saveLocation(
+          selectedType,
+          _selectedAddress!,
+          _selectedLatLng!.latitude,
+          _selectedLatLng!.longitude,
+        );
+
+        // Return the selected address to the previous screen
+        Navigator.pop(context, {
+          "address": _selectedAddress!,
+          "latitude": _selectedLatLng!.latitude,
+          "longitude": _selectedLatLng!.longitude,
+          "type": selectedType
+        });
+      }
+    });
+  }
+
+  void _saveLocation(String type) {
+    // Here you would save the location to your database or shared preferences
+    // For now, we'll just print it
+    print('Saving location as $type: ${_selectedAddress}');
+
+    // You can implement your storage logic here
+    // For example, using shared_preferences:
+    // final prefs = await SharedPreferences.getInstance();
+    // prefs.setString('$type_location', json.encode({
+    //   'address': _selectedAddress,
+    //   'latitude': _selectedLatLng!.latitude,
+    //   'longitude': _selectedLatLng!.longitude
+    // }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Location Picker", style: TextStyle(color: Colors.white),),
-      iconTheme: IconThemeData(color: Colors.white),
-      backgroundColor: Colors.orangeAccent),
+      appBar: AppBar(
+          title: const Text("Location Picker", style: TextStyle(color: Colors.white)),
+          iconTheme: IconThemeData(color: Colors.white),
+          backgroundColor: Colors.orangeAccent
+      ),
       body: _currentLatLng == null
           ? const Center(child: CircularProgressIndicator())
           : Stack(
@@ -158,7 +234,9 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
               await _getAddressFromLatLng(_currentLatLng!);
             },
             onCameraMove: (position) {
-              _currentLatLng = position.target;
+              setState(() {
+                _currentLatLng = position.target;
+              });
             },
             onCameraIdle: () {
               if (_currentLatLng != null) {
@@ -216,27 +294,23 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
             right: 50,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orangeAccent
+                  backgroundColor: Colors.orangeAccent
               ),
               onPressed: () async {
-                if (_currentLatLng != null && _selectedAddress == null) {
-                  await _getAddressFromLatLng(_currentLatLng!);
+                if (_selectedLatLng != null && _selectedAddress == null) {
+                  await _getAddressFromLatLng(_selectedLatLng!);
                 }
 
                 if (_selectedAddress != null) {
-                  // Return the selected address to the previous screen
-                  Navigator.pop(context, {
-                    "address": _selectedAddress!,
-                    "latitude": _currentLatLng!.latitude,
-                    "longitude": _currentLatLng!.longitude
-                  });
+                  // Show the location type selector
+                  _showLocationTypeSelector();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Please pick a location first")),
                   );
                 }
               },
-              child: const Text("Confirm Location", style: TextStyle(color: Colors.white),),
+              child: const Text("Confirm Location", style: TextStyle(color: Colors.white)),
             ),
           ),
         ],

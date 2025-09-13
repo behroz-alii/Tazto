@@ -4,6 +4,11 @@ import 'package:tazto/Presentation/restaurantRegistrationPage.dart';
 import 'dart:io';
 import 'package:tazto/Presentation/privacyPolicy.dart';
 import 'package:tazto/Presentation/helpSupportPage.dart';
+import 'package:tazto/Presentation/settingsPage.dart';
+import 'package:tazto/Presentation/myAddressesPage.dart';
+import 'package:tazto/services/locationManager.dart';
+
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -17,6 +22,9 @@ class _ProfilePageState extends State<ProfilePage> {
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
   bool _imageError = false;
+
+  //to access saved locations
+  final LocationManager _locationManager = LocationManager();
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -191,25 +199,40 @@ class _ProfilePageState extends State<ProfilePage> {
                     title: "My Favorite Restaurants",
                     onTap: () {},
                   ),
-                  const Divider(height: 1),
+
                   _buildProfileOption(
                     icon: Icons.local_offer_outlined,
                     title: "Special Offers & Promo",
                     onTap: () {},
                   ),
-                  const Divider(height: 1),
+
                   _buildProfileOption(
                     icon: Icons.credit_card,
                     title: "Payment Methods",
                     onTap: () {},
                   ),
-                  const Divider(height: 1),
+
                   _buildProfileOption(
                     icon: Icons.location_on,
                     title: "My Addresses",
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MyAddressesPage(
+                            savedLocations: _locationManager.savedLocations,
+                            onLocationsUpdated: (updatedLocations) {
+                              // Update the location manager with new locations
+                              _locationManager.updateLocations(updatedLocations);
+                              setState(() {}); // Refresh the UI if needed
+                            },
+                          ),
+                        ),
+                      );
+
+                    },
                   ),
-                  const Divider(height: 1),
+
+
                   _buildProfileOption(
                     icon: Icons.privacy_tip_outlined,
                     title: "Privacy",
@@ -217,13 +240,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) => PrivacyPolicyPage()));
                     },
                   ),
-                  const Divider(height: 1),
+
                   _buildProfileOption(
                     icon: Icons.settings,
                     title: "Settings",
-                    onTap: () {},
+                    onTap: () {Navigator.of(context).push(MaterialPageRoute(builder: (context) => SettingsPage()));},
                   ),
-                  const Divider(height: 1),
+
                   _buildProfileOption(
                     icon: Icons.restaurant,
                     title: "Become TazTo",
@@ -233,7 +256,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           const RestaurantRegistrationPage()));
                     },
                   ),
-                  const Divider(height: 1),
+
                   _buildProfileOption(
                     icon: Icons.help_outline,
                     title: "Help & Support",

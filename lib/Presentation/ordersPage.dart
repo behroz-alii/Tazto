@@ -12,19 +12,21 @@ class MyOrdersPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final orderProvider = Provider.of<OrderProvider>(context);
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[50],
       appBar: AppBar(
         title: const Text("My Orders",
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         centerTitle: true,
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: isDarkMode ? Colors.grey[900] : Colors.orangeAccent,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: orderProvider.orders.isEmpty
-          ? _buildNoOrdersAnimation(context)
+          ? _buildNoOrdersAnimation(context, isDarkMode)
           : RefreshIndicator(
         onRefresh: () async {
           // Simulate refresh
@@ -33,21 +35,27 @@ class MyOrdersPage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildOngoingOrdersAnimation(context),
+            _buildOngoingOrdersAnimation(context, isDarkMode),
             const SizedBox(height: 20),
             ...orderProvider.orders.map((order) =>
-                _buildOrderCard(context, order)).toList(),
+                _buildOrderCard(context, order, isDarkMode)).toList(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildOngoingOrdersAnimation(BuildContext context) {
+  Widget _buildOngoingOrdersAnimation(BuildContext context, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: isDarkMode
+            ? LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.orange[800]!, Colors.orange[900]!],
+        )
+            : LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Colors.orange[100]!, Colors.orange[50]!],
@@ -55,7 +63,7 @@ class MyOrdersPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.1),
+            color: Colors.orange.withOpacity(isDarkMode ? 0.3 : 0.1),
             blurRadius: 10,
             spreadRadius: 2,
           ),
@@ -72,7 +80,7 @@ class MyOrdersPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange[800],
+                    color: isDarkMode ? Colors.white : Colors.orange[800],
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -80,7 +88,7 @@ class MyOrdersPage extends StatelessWidget {
                   "Your delicious food is being prepared",
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.orange[700],
+                    color: isDarkMode ? Colors.white70 : Colors.orange[700],
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -88,7 +96,7 @@ class MyOrdersPage extends StatelessWidget {
                   "Estimated delivery: 40-50 min",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.orange[600],
+                    color: isDarkMode ? Colors.white60 : Colors.orange[600],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -106,15 +114,15 @@ class MyOrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderCard(BuildContext context, Order order) {
+  Widget _buildOrderCard(BuildContext context, Order order, bool isDarkMode) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(isDarkMode ? 0.3 : 0.1),
             blurRadius: 10,
             spreadRadius: 2,
             offset: const Offset(0, 3),
@@ -125,26 +133,26 @@ class MyOrdersPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Restaurant Header
-          _buildRestaurantHeader(order),
+          _buildRestaurantHeader(order, isDarkMode),
 
           // Order Items
-          _buildOrderItemsSection(order),
+          _buildOrderItemsSection(order, isDarkMode),
 
           // Order Summary
-          _buildOrderSummary(order),
+          _buildOrderSummary(order, isDarkMode),
 
           // Status & Actions
-          _buildStatusSection(order),
+          _buildStatusSection(order, isDarkMode),
         ],
       ),
     );
   }
 
-  Widget _buildRestaurantHeader(Order order) {
+  Widget _buildRestaurantHeader(Order order, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: isDarkMode ? Colors.grey[700] : Colors.grey[50],
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -177,9 +185,10 @@ class MyOrdersPage extends StatelessWidget {
               children: [
                 Text(
                   order.restaurantName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -187,7 +196,7 @@ class MyOrdersPage extends StatelessWidget {
                   "Order #${order.id.substring(0, 8)}",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                   ),
                 ),
               ],
@@ -198,7 +207,7 @@ class MyOrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderItemsSection(Order order) {
+  Widget _buildOrderItemsSection(Order order, bool isDarkMode) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
@@ -209,7 +218,7 @@ class MyOrdersPage extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
             ),
           ),
           const SizedBox(height: 8),
@@ -229,7 +238,10 @@ class MyOrdersPage extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.name,
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -237,7 +249,7 @@ class MyOrdersPage extends StatelessWidget {
                   "x${item.quantity}",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -261,10 +273,10 @@ class MyOrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderSummary(Order order) {
+  Widget _buildOrderSummary(Order order, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.grey[50],
+      color: isDarkMode ? Colors.grey[700] : Colors.grey[50],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -275,15 +287,15 @@ class MyOrdersPage extends StatelessWidget {
                 "Total",
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                 ),
               ),
               Text(
                 "\$${order.totalAmount.toStringAsFixed(2)}",
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: isDarkMode ? Colors.white : Colors.black,
                 ),
               ),
             ],
@@ -292,7 +304,7 @@ class MyOrdersPage extends StatelessWidget {
             _formatDate(order.dateTime),
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[500],
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[500],
             ),
           ),
         ],
@@ -300,7 +312,7 @@ class MyOrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusSection(Order order) {
+  Widget _buildStatusSection(Order order, bool isDarkMode) {
     Color statusColor = Colors.orange;
     IconData statusIcon = Icons.access_time;
     String statusText = "Preparing";
@@ -348,7 +360,7 @@ class MyOrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNoOrdersAnimation(BuildContext context) {
+  Widget _buildNoOrdersAnimation(BuildContext context, bool isDarkMode) {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -367,7 +379,7 @@ class MyOrdersPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: isDarkMode ? Colors.white : Colors.grey[800],
               ),
             ),
             const SizedBox(height: 12),
@@ -375,7 +387,7 @@ class MyOrdersPage extends StatelessWidget {
               "Your order history will appear here",
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[600],
+                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
               ),
               textAlign: TextAlign.center,
             ),

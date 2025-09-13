@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:tazto/Presentation/profilePage.dart';
-import 'restaurantsPage.dart';
+import 'package:tazto/Presentation/restaurantsPage.dart';
 import 'package:tazto/Presentation/restaurantModel.dart';
-import 'messagePage.dart';
-import 'aiChatPage.dart';
+import 'package:tazto/Presentation/messagePage.dart';
+import 'package:tazto/Presentation/aiChatPage.dart';
 import 'package:tazto/Presentation/cartPage.dart';
 import 'package:tazto/services/cartProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:tazto/Presentation/ordersPage.dart';
 import 'package:tazto/services/searchService.dart';
-import 'restaurantMenuPage.dart';
+import 'package:tazto/Presentation/restaurantMenuPage.dart';
 import 'package:tazto/Presentation/locationPickerPage.dart';
 
-// 1. Heart Icon Toggle Widget (unchanged)
+// 1. Heart Icon Toggle Widget
 class HeartIconToggle extends StatefulWidget {
-  const HeartIconToggle({Key? key}) : super(key: key);
+  const HeartIconToggle({super.key});
 
   @override
   _HeartIconToggleState createState() => _HeartIconToggleState();
@@ -52,10 +52,11 @@ class _HeartIconToggleState extends State<HeartIconToggle> {
   }
 }
 
+// 2. Deals Slider
 class DealsSlider extends StatelessWidget {
   final List<String> adImages;
 
-  const DealsSlider({required this.adImages, Key? key}) : super(key: key);
+  const DealsSlider({required this.adImages, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +89,7 @@ class DealsSlider extends StatelessWidget {
   }
 }
 
+// 3. Custom Container
 class CustomContainer extends StatelessWidget {
   final String title;
   final String imagePath;
@@ -97,8 +99,8 @@ class CustomContainer extends StatelessWidget {
     required this.title,
     required this.imagePath,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +132,7 @@ class CustomContainer extends StatelessWidget {
   }
 }
 
+// 4. Deals Widget
 class Deals extends StatelessWidget {
   final String title;
   final String imgPath;
@@ -143,8 +146,8 @@ class Deals extends StatelessWidget {
     required this.distance,
     required this.review,
     required this.price,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -212,8 +215,9 @@ class Deals extends StatelessWidget {
   }
 }
 
+// 5. HomePage Widget
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -320,19 +324,19 @@ class _HomePageState extends State<HomePage> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
             builder: (context) => const AIChatWidget(),
           );
         },
-        backgroundColor: Colors.orange.withOpacity(0.4),
         child: const Icon(Icons.android, size: 28, color: Colors.white),
       ) : null,
     );
   }
 }
 
+// 6. HomeContent Widget
 class HomeContent extends StatefulWidget {
-  const HomeContent({Key? key}) : super(key: key);
+  const HomeContent({super.key});
 
   @override
   State<HomeContent> createState() => _HomeContentState();
@@ -345,7 +349,7 @@ class _HomeContentState extends State<HomeContent> {
     'Assets/Deals/Deal 2.jpg',
     'Assets/Deals/Deal 3.jpg',
   ];
-  String _currentAddress = 'Confirm your address';
+  String _currentAddress = '123 Demo Street';
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   final SearchService _searchService = SearchService(getMockRestaurants());
@@ -441,7 +445,7 @@ class _HomeContentState extends State<HomeContent> {
           restaurant: restaurant,
           cart: cartProvider,
           onCartUpdated: () => cartProvider.notifyListeners(),
-          highlightItem: highlightItem, // This should work now
+          highlightItem: highlightItem,
         ),
       ),
     ).then((_) {
@@ -497,6 +501,9 @@ class _HomeContentState extends State<HomeContent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: _showSearchResults
           ? CustomScrollView(
@@ -510,9 +517,12 @@ class _HomeContentState extends State<HomeContent> {
               focusNode: _searchFocusNode,
               decoration: InputDecoration(
                 hintText: "Search meals or restaurants",
+                hintStyle: TextStyle(
+                  color: isDarkMode ? Colors.white70 : Colors.grey[600],
+                ),
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
@@ -557,7 +567,6 @@ class _HomeContentState extends State<HomeContent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // In HomePage.dart - Update the location icon onTap handler
                       Row(
                         children: [
                           GestureDetector(
@@ -567,7 +576,7 @@ class _HomeContentState extends State<HomeContent> {
                                 MaterialPageRoute(builder: (_) => const LocationPickerPage()),
                               );
 
-                              if (result != null && result is Map<String, dynamic>) {
+                              if (result != null) {
                                 setState(() {
                                   _currentAddress = result["address"];
                                 });
@@ -585,15 +594,18 @@ class _HomeContentState extends State<HomeContent> {
                           ),
                         ],
                       ),
-                       SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: _searchController,
                         focusNode: _searchFocusNode,
                         decoration: InputDecoration(
                           hintText: "Search meals or restaurants",
+                          hintStyle: TextStyle(
+                            color: isDarkMode ? Colors.white70 : Colors.grey[600],
+                          ),
                           prefixIcon: const Icon(Icons.search),
                           filled: true,
-                          fillColor: Colors.grey[200],
+                          fillColor: isDarkMode ? Colors.grey[700] : Colors.grey[200],
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide.none,
@@ -664,17 +676,18 @@ class _HomeContentState extends State<HomeContent> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         'Special Offers!',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
+                          color: isDarkMode ? Colors.white : Colors.black,
                         ),
                       ),
                       const Spacer(),
                       GestureDetector(
                         onTap: () {},
-                        child: const Text(
+                        child: Text(
                           'View All',
                           style: TextStyle(
                             color: Colors.deepOrange,
@@ -738,19 +751,20 @@ class _HomeContentState extends State<HomeContent> {
                 const SizedBox(height: 5),
                 Container(
                   height: 40,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.orangeAccent, Colors.white],
+                      colors: [Colors.orangeAccent, isDarkMode ? Colors.grey[900]! : Colors.white],
                     ),
                   ),
                   padding: const EdgeInsets.only(left: 10),
-                  child: const Align(
+                  child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Recommended for you 😍',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
