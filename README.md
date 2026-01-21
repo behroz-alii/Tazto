@@ -1,16 +1,48 @@
-# tazto
+# Tazto – Food Ordering Mobile App (Flutter)
 
-A new Flutter project.
+## 👋 About the Project
 
-## Getting Started
+**Tazto** is a complete mobile application built using **Flutter**, not just focused on UI but also on real app functionality.
 
-This project is a starting point for a Flutter application.
+Along with designing a clean and modern interface, I connected the app to **Firebase**, implemented **Firebase Authentication**, and integrated **Stripe** for online payments. The goal of this project was to simulate a real-world food ordering experience — from browsing items to secure checkout.
 
-A few resources to get you started if this is your first Flutter project:
+This project reflects how I approach mobile apps end-to-end: **design, logic, backend integration, and payments**.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ✨ Key Features
+
+- Clean and modern UI with smooth user flow  
+- Firebase Authentication (sign up / login)  
+- Real-time data handling using Firebase  
+- Stripe payment gateway integration  
+- Reusable and scalable Flutter widgets  
+- Responsive layout for multiple screen sizes  
+
+---
+
+## 🛠 Tech Stack
+
+- **Flutter**
+- **Dart**
+- **Firebase**
+  - Authentication
+  - Database
+- **Stripe Payment Gateway**
+- Material UI
+
+---
+
+## 📁 Project Structure
+
+The project follows a clean and understandable structure:
+
+- `lib/screens` – App screens and UI pages  
+- `lib/widgets` – Reusable UI components  
+- `lib/models` – Data models  
+- `lib/services` – Firebase & Stripe related logic  
+- `lib/utils` – Constants and helper files  
+
+This structure keeps the app easy to maintain and extend.
+
+---
