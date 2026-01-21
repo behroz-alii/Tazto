@@ -1,9 +1,9 @@
 # Tazto – Food Ordering Mobile App (Flutter)
 
 <p align="center">
-  <img src="Assets/Tazto - 1-100.jpg" width="220" />
-  <img src="Assets/Tazto - 2-100.jpg" width="220" />
-  <img src="Assets/Tazto - 3-100.jpg" width="220" />
+  <img src="Assets/Tazto - 1-100.jpg"/>
+  <img src="Assets/Tazto - 2-100.jpg"/>
+  <img src="Assets/Tazto - 3-100.jpg"/>
 </p>
 
 ## 👋 About the Project
